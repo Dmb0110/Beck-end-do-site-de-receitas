@@ -1,3 +1,5 @@
+
+'''
 from fastapi import FastAPI
 from models.models import Base,engine
 from crud import router as crud_router
@@ -27,10 +29,7 @@ app.include_router(jwt_router)
 app.mount('/',StaticFiles(directory='front3',html=True), name='static')
 
 
-
-
-
-
+'''
 
 
 
@@ -45,7 +44,7 @@ app = FastAPI()
 # Middleware para permitir requisições do frontend hospedado na Vercel
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://meu-front.vercel.app"],  # Substitua pela URL real do frontend
+    allow_origins=["https://receitasmasterchef.vercel.app/"],  # Substitua pela URL real do frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -59,12 +58,15 @@ app.include_router(crud_router)
 app.include_router(jwt_router)
 
 
+'''
 
-
-
-// Exemplo de chamada
+ Exemplo de chamada
 fetch("https://meu-back.vercel.app/api/login", {
   method: "POST",
   body: JSON.stringify({ email, senha }),
   headers: { "Content-Type": "application/json" }
 })
+'''
+
+
+
