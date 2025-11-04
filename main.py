@@ -60,6 +60,19 @@ app.include_router(jwt_router)
 
 '''
 
+
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: 'postgresql://neondb_owner:npg_HDj9psUF4Scv@ep-red-meadow-acf8hr0w-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+
+
+
+
  Exemplo de chamada
 fetch("https://meu-back.vercel.app/api/login", {
   method: "POST",
