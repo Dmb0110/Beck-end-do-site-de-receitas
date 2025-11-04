@@ -1,23 +1,20 @@
+# Usa uma imagem base com Python
 FROM python:3.11-slim
 
-# Instala Java para language_tool_python
-RUN apt-get update && apt-get install -y \
-    openjdk-21-jdk-headless \
-    && apt-get clean
-
+# Define o diretório de trabalho dentro do container
 WORKDIR /app
 
+# Copia os arquivos de dependência primeiro
 COPY requirements.txt .
+
+# Instala as dependências
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia apenas os arquivos do backend
-COPY main.py .
-COPY models/ models/
-COPY schemas.py .
-COPY crud.py .
-COPY autenticacao10/ autenticacao10/
+# Copia o restante do código
+COPY . .
 
+# Expõe a porta que o Uvicorn vai usar
 EXPOSE 8000
 
+# Comando para iniciar o servidor FastAPI com Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
