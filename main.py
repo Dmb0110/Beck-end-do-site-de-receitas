@@ -83,6 +83,35 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  backend:  # renomeado de "web" para "backend" para refletir melhor o propósito
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"  # ajuste conforme a porta usada pela sua API
+    environment:
+      DATABASE_URL: postgresql://postgres:davi9090@db:5432/banco_dmb
+
+volumes:
+  pgdata:
+
+
+
+
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: davi9090
+      POSTGRES_DB: banco_dmb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   web:
     build: .
     depends_on:
