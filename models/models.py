@@ -20,8 +20,8 @@ SessionLocal = sessionmaker(bind=engine,autocommit=False,autoflush=False)
 Base = declarative_base()
 
 # Sobrescreve a URL do banco se estiver definida como variável de ambiente (útil para Docker)
-DATABASE_URL = os.getenv("DATABASE_URL")
-engine = create_engine(DATABASE_URL)
+#DATABASE_URL = os.getenv("DATABASE_URL")
+#engine = create_engine(DATABASE_URL)
 
 # Modelo da tabela 'usuarios'
 class Usuario(Base):
