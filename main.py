@@ -66,6 +66,68 @@ fetch("https://meu-back.vercel.app/api/login", {
   body: JSON.stringify({ email, senha }),
   headers: { "Content-Type": "application/json" }
 })
+
+
+
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: davi9090
+      POSTGRES_DB: banco_dmb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:davi9090@db:5432/banco_dmb
+
+volumes:
+  pgdata:
+
+
+
+
+  
+
+
+
+  FROM python:3.11-slim
+
+# Instala dependências do sistema, incluindo Java
+RUN apt-get update && apt-get install -y \
+    openjdk-21-jdk-headless \
+    && apt-get clean
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY front3/ front3/
+COPY main.py .
+COPY models.py models.py
+COPY schemas.py schemas.py
+COPY crud.py crud.py
+COPY autenticacao10/ autenticacao10/
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+
 '''
 
 
