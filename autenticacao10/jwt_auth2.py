@@ -124,3 +124,38 @@ def enviar(request: Request, criar: CriarReceita, db: Session = Depends(get_db))
     db.commit()
     db.refresh(nova_receita)
     return nova_receita
+
+
+
+
+
+'''
+
+
+tool = language_tool_python.LanguageToolPublic('pt-BR')
+
+
+
+
+def corrigir_texto(texto: str) -> str:
+    """Corrige ortografia e aplica capitalização no início de frases."""
+    try:
+        matches = tool.check(texto)
+        texto_corrigido = language_tool_python.utils.correct(texto, matches)
+        return capitalizar_frases(texto_corrigido)
+    except Exception as e:
+        print(f"Erro ao corrigir texto: {e}")
+        return capitalizar_frases(texto)  # retorna texto original capitalizado
+
+'''
+
+
+
+
+
+
+
+
+
+
+
