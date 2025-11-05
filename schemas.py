@@ -13,7 +13,7 @@ class RegisterRequest(BaseModel):
 
 # Modelo para criação de uma nova receita
 class CriarReceita(BaseModel):
-    nome_da_receita: contr(max_length=100)
+    nome_da_receita: constr(max_length=100)
     ingredientes: constr(max_length=1000)
     modo_de_preparo: constr(max_length=2000)
 
