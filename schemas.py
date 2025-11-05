@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 
 # Modelo para requisição de login
 class LoginRequest(BaseModel):
@@ -13,9 +13,9 @@ class RegisterRequest(BaseModel):
 
 # Modelo para criação de uma nova receita
 class CriarReceita(BaseModel):
-    nome_da_receita: str
-    ingredientes: str
-    modo_de_preparo: str
+    nome_da_receita: contr(max_length=100)
+    ingredientes: constr(max_length=1000)
+    modo_de_preparo: constr(max_length=2000)
 
 # Modelo de saída de receita (inclui ID)
 class ReceitaOut(BaseModel):
