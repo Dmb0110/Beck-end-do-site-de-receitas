@@ -1,6 +1,8 @@
+
+'''
 from fastapi import APIRouter,HTTPException,Depends
 from sqlalchemy.orm import Session
-from models.models import SessionLocal,Receita,Usuario
+from app.models.models_receita import SessionLocal,Receita,Usuario
 from schemas import ReceitaOut,CriarReceita,Atualizar,LoginRequest,RegisterRequest
 from typing import List
 from fastapi.responses import RedirectResponse
@@ -56,3 +58,6 @@ def espefico(id: int,db: Session = Depends(get_db)):
     if not receita:
         raise HTTPException(status_code=404,detail='receita nao encontrada')
     return receita
+'''
+    
+
