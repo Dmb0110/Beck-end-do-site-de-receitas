@@ -7,7 +7,7 @@ from app.crud_services.login_service import LoginService
 router = APIRouter()
 
 @router.post(
-        "/",
+        "/login",
         summary='Criar login para o usuario e gera token',
         status_code=status.HTTP_201_CREATED
 )

@@ -14,7 +14,7 @@ router = APIRouter()
 security = HTTPBearer()
 
 @router.post(
-        '/',
+        '/enviar',
         summary='Rota protegida pra criar receita',
         response_model=ReceitaOut,
         status_code=status.HTTP_201_CREATED
@@ -52,7 +52,7 @@ security = HTTPBearer()
 UNSPLASH_API_KEY = "SUA_CHAVE_AQUI"  # coloque sua chave da API
 
 @router.post(
-    "/",
+    "/enviar",
     summary="Rota protegida pra criar receita",
     response_model=ReceitaOut,
     status_code=status.HTTP_201_CREATED,
