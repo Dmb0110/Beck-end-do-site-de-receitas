@@ -77,7 +77,7 @@ def enviar(
         imagem_url = response["results"][0]["urls"]["regular"]
 
     # Salva receita no banco
-    receita = ReceitaService.criar_receita_auth(criar, db, username)
+    receita = ReceitaService.criar_receita_auth(criar, db)
 
     # Adiciona a URL da imagem ao retorno
     receita_dict = receita.__dict__
