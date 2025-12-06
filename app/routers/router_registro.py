@@ -7,7 +7,7 @@ from app.crud_services.registro_service import RegistroService
 router = APIRouter()
 
 @router.post(
-        "/",
+        "/registro",
         summary='Rota pra registrar usuario e senha',
         status_code=status.HTTP_201_CREATED
 )

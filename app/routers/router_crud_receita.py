@@ -18,7 +18,7 @@ def health_check():
 
 
 @router.get(
-    "/",
+    "/receber",
     summary="Retorna todas as receitas",
     response_model=List[ReceitaOut],
     status_code=status.HTTP_200_OK
@@ -32,7 +32,7 @@ def receber(service: ReceitaService = Depends()):
 
 
 @router.put(
-    "/{receita_id}",
+    "/trocar/{receita_id}",
     summary="Trocar dados da receita",
     response_model=ReceitaOut,
     status_code=status.HTTP_200_OK
@@ -52,7 +52,7 @@ def trocar(
 
 
 @router.delete(
-    "/{receita_id}",
+    "/deletar/{receita_id}",
     summary="Deletar uma receita",
     status_code=status.HTTP_200_OK
 )
