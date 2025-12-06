@@ -25,7 +25,8 @@ class ReceitaService:
         Retorna todos os clientes cadastrados.
         """
         receitas = self.db.query(Receita).all()
-        return [ReceitaOut.model_validate(c) for c in receitas]
+        return [ReceitaOut.from_orm(r) for r in receitas]
+        #return [ReceitaOut.model_validate(c) for c in receitas]
     
 
     def trocar_receita(self, receita_id: int, at: Atualizar) -> ReceitaOut:
