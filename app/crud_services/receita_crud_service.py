@@ -37,7 +37,7 @@ class ReceitaService:
         """
         receita = self.db.query(Receita).filter(Receita.id == receita_id).first()
         if not receita:
-            raise HTTPException(status_code=404, detail="Cliente não encontrado")
+            raise HTTPException(status_code=404, detail="Receita não encontrada")
 
         if at.nome_da_receita is not None:
             receita.nome_da_receita = at.nome_da_receita
