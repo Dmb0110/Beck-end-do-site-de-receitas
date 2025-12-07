@@ -35,7 +35,8 @@ def enviar(
 '''
 
 
-
+##############################################################
+'''
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -84,7 +85,65 @@ def enviar(
     receita_dict["imagem_url"] = imagem_url
 
     return receita_dict
+'''
+###########################################################
 
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import requests
+
+from app.schemas.schemas import CriarReceita, ReceitaOut
+from app.database.session import get_db
+from app.crud_services.receita_auth_post_service import ReceitaService
+from app.autenticacao10.jwt_auth2 import verificar_token, corrigir_texto
+
+router = APIRouter()
+security = HTTPBearer()
+
+PIXABAY_API_KEY = "SUA_CHAVE_PIXABAY"  # coloque sua chave da API
+
+def buscar_imagem_por_titulo(titulo: str) -> str | None:
+    """Consulta a API do Pixabay e retorna a URL da primeira imagem encontrada."""
+    url = f"https://pixabay.com/api/?key={PIXABAY_API_KEY}&q={titulo}&image_type=photo&per_page=1"
+    response = requests.get(url).json()
+    if response.get("hits"):
+        return response["hits"][0]["webformatURL"]
+    return None
+
+@router.post(
+    "/enviar",
+    summary="Rota protegida pra criar receita",
+    response_model=ReceitaOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def enviar(
+    criar: CriarReceita,
+    db: Session = Depends(get_db),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
+    username = verificar_token(credentials)
+
+    # Corrige texto antes de salvar
+    criar.nome_da_receita = corrigir_texto(criar.nome_da_receita)
+    criar.ingredientes = corrigir_texto(criar.ingredientes)
+    criar.modo_de_preparo = corrigir_texto(criar.modo_de_preparo)
+
+    # 🔎 Busca imagem real do prato pelo título
+    imagem_url = buscar_imagem_por_titulo(criar.nome_da_receita)
+
+    # Salva receita no banco
+    receita = ReceitaService.criar_receita_auth(criar, db)
+
+    # Adiciona a URL da imagem ao retorno
+    receita_dict = receita.__dict__
+    receita_dict["imagem_url"] = imagem_url
+
+    return receita_dict
+
+
+
+#############################################################
 
 '''
 codigo do arquivo index.html do site de receitas:
