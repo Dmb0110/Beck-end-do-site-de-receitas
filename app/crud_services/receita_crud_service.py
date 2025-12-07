@@ -41,8 +41,10 @@ class ReceitaService:
 
         if at.nome_da_receita is not None:
             receita.nome_da_receita = at.nome_da_receita
-        if at.idade is not None:
-            receita.idade = at.idade
+        if at.ingredientes is not None:
+            receita.ingredientes = at.ingredientes
+        if at.modo_de_preparo is not None:
+            receita.modo_de_preparo = at.modo_de_preparo
 
         self.db.commit()
         self.db.refresh(receita)
@@ -63,8 +65,8 @@ class ReceitaService:
         return {"mensagem": "Receita deletada com sucesso"}
 
 
-    def exibir_receita_espefica(self,id: int,db: Session = Depends(get_db)):
-        receita = db.query(Receita).filter(Receita.id == id).first()
+    def exibir_receita_especifica(self,id: int) -> ReceitaOut:
+        receita = self.db.query(Receita).filter(Receita.id == id).first()
         if not receita:
-            raise HTTPException(status_code=404,detail='receita nao encontrada')
-        return receita
+            raise Exception('Receita nao encontrada')
+        return ReceitaOut.from_orm(receita)

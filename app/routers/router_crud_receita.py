@@ -31,6 +31,16 @@ def receber(service: ReceitaService = Depends()):
     return service.receber_todos_as_receitas()
 
 
+@router.get(
+    '/especifico/{receita_id}',
+    summary='Seleciona uma receita',
+    response_model=ReceitaOut,
+    status_code=status.HTTP_200_OK
+)
+def trocar(receita_id: int,service: ReceitaService = Depends()):
+    return service.exibir_receita_especifica(receita_id)
+
+
 @router.put(
     "/trocar/{receita_id}",
     summary="Trocar dados da receita",
