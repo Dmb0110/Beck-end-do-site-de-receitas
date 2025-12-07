@@ -133,7 +133,7 @@ def enviar(
     imagem_url = buscar_imagem_por_titulo(criar.nome_da_receita)
 
     # Salva receita no banco
-    receita = ReceitaService.criar_receita_auth(criar, db)
+    receita = ReceitaService.criar_receita_auth(criar, db,imagem_url=imagem_url)
 
     # Adiciona a URL da imagem ao retorno
     receita_dict = receita.__dict__
