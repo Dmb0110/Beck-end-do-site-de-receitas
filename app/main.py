@@ -45,7 +45,7 @@ app = FastAPI()
 # Middleware para permitir requisições do frontend hospedado na Vercel
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://receitasmasterchef.vercel.app/"],  # Substitua pela URL real do frontend
+    allow_origins=["https://receitasmasterchef.vercel.app"],  # Substitua pela URL real do frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
