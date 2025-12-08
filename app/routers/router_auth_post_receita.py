@@ -1,3 +1,88 @@
+######################################################
+
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import requests
+
+from app.schemas.schemas import CriarReceita, ReceitaOut
+from app.database.session import get_db
+from app.crud_services.receita_auth_post_service import ReceitaService
+from app.models.models_receita import Receita
+from app.autenticacao10.jwt_auth2 import verificar_token, corrigir_texto
+
+router = APIRouter()
+security = HTTPBearer()
+
+# 🔑 Sua chave real do Pixabay
+PIXABAY_API_KEY = "53619592-285ee82e135be902f1ae2b184"
+
+def buscar_imagem_por_titulo(titulo: str) -> str | None:
+    """Consulta a API do Pixabay e retorna a URL da primeira imagem encontrada."""
+    url = f"https://pixabay.com/api/?key={PIXABAY_API_KEY}&q={titulo}&image_type=photo&per_page=1"
+    response = requests.get(url).json()
+    if response.get("hits"):
+        return response["hits"][0]["webformatURL"]
+    return None
+
+def atualizar_imagens_antigas(db: Session, limite: int = 5) -> int:
+    """
+    Atualiza automaticamente receitas antigas sem imagem.
+    Por padrão, atualiza até 'limite' receitas por vez para não deixar lento.
+    """
+    receitas = db.query(Receita).filter(Receita.imagem_url == None).limit(limite).all()
+    atualizadas = 0
+
+    for receita in receitas:
+        imagem_url = buscar_imagem_por_titulo(receita.nome_da_receita)
+        if imagem_url:
+            receita.imagem_url = imagem_url
+            db.add(receita)
+            atualizadas += 1
+
+    if atualizadas > 0:
+        db.commit()
+
+    return atualizadas
+
+@router.post(
+    "/enviar",
+    summary="Rota protegida pra criar receita",
+    response_model=ReceitaOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def enviar(
+    criar: CriarReceita,
+    db: Session = Depends(get_db),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
+    username = verificar_token(credentials)
+
+    # Corrige texto antes de salvar
+    criar.nome_da_receita = corrigir_texto(criar.nome_da_receita)
+    criar.ingredientes = corrigir_texto(criar.ingredientes)
+    criar.modo_de_preparo = corrigir_texto(criar.modo_de_preparo)
+
+    # 🔎 Busca imagem real do prato pelo título
+    imagem_url = buscar_imagem_por_titulo(criar.nome_da_receita)
+
+    # Salva receita no banco com imagem
+    receita = ReceitaService.criar_receita_auth(criar, db, imagem_url=imagem_url)
+
+    # ⚡ Atualiza automaticamente algumas receitas antigas sem imagem
+    atualizadas = atualizar_imagens_antigas(db)
+
+    # Retorno inclui a receita criada e quantas antigas foram atualizadas
+    return {
+        "nova_receita": receita,
+        "receitas_antigas_atualizadas": atualizadas
+    }
+
+
+
+
+######################################################
+
 
 '''
 from fastapi import APIRouter, Depends,status, Request
@@ -87,7 +172,7 @@ def enviar(
     return receita_dict
 '''
 ###########################################################
-
+'''
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -101,7 +186,7 @@ from app.autenticacao10.jwt_auth2 import verificar_token, corrigir_texto
 router = APIRouter()
 security = HTTPBearer()
 
-PIXABAY_API_KEY = "SUA_CHAVE_PIXABAY"  # coloque sua chave da API
+PIXABAY_API_KEY = "53619592-285ee82e135be902f1ae2b184" # coloque sua chave da API
 
 def buscar_imagem_por_titulo(titulo: str) -> str | None:
     """Consulta a API do Pixabay e retorna a URL da primeira imagem encontrada."""
@@ -142,7 +227,7 @@ def enviar(
     return receita_dict
 
 
-
+'''
 #############################################################
 
 '''
