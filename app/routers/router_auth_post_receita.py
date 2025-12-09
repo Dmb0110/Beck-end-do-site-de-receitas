@@ -9,15 +9,14 @@ from app.database.session import get_db
 from app.crud_services.receita_auth_post_service import ReceitaService
 from app.models.models_receita import Receita
 from app.autenticacao10.jwt_auth2 import verificar_token, corrigir_texto
+import os
 
 router = APIRouter()
 security = HTTPBearer()
 
 # Exemplo: chave de API de um serviço de geração de imagens (OpenAI, Replicate, Stability etc.)
-IA_API_KEY = "REMOVED_KEYproj-gArDq3SGq6cD0oC8-ZieTL03kKUeXgh8BGWIGOKUvVLFTcK6cPJUtM7B1EU6_WuiUsnS_5tpy1T3BlbkFJfrLtmZfxY3Fo1CJQfViK1E4wx7hx4WrYWV0-xYwSPjLvEz8FBCD1GZqB8jo_TlNuGgxjfyWS4A"
-'''
-"53619592-285ee82e135be902f1ae2b184"
-'''
+IA_API_KEY = os.getenv('OPENAI_API_KEY')
+
 
 def gerar_imagem_por_ia(nome_da_receita: str,ingredientes: str) -> str | None:
     """
