@@ -119,7 +119,7 @@ def enviar(
 
 
 ######################################################
-
+'''
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -155,7 +155,7 @@ def buscar_imagem_por_titulo(titulo: str) -> str | None:
         print("Erro ao buscar imagem:", e)
         return None
 
-
+'''
 
 '''
 def buscar_imagem_por_titulo(titulo: str) -> str | None:
@@ -165,6 +165,7 @@ def buscar_imagem_por_titulo(titulo: str) -> str | None:
     if response.get("hits"):
         return response["hits"][0]["webformatURL"]
     return None
+'''
 '''
 def atualizar_imagens_antigas(db: Session, limite: int = 5) -> int:
     """
@@ -214,6 +215,7 @@ def enviar(
     atualizadas = atualizar_imagens_antigas(db)
 
     return receita
+'''
 
 
 '''
