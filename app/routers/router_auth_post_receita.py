@@ -105,7 +105,7 @@ def enviar(
     criar.modo_de_preparo = corrigir_texto(criar.modo_de_preparo)
 
     # 🔎 Gera imagem da receita com IA
-    imagem_url = gerar_imagem_por_ia(criar.nome_da_receita)
+    imagem_url = gerar_imagem_por_ia(criar.nome_da_receita,ingredientes)
 
     # Salva receita no banco com imagem
     receita = ReceitaService.criar_receita_auth(criar, db, imagem_url=imagem_url)
