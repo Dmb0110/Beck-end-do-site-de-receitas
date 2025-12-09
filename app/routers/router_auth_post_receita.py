@@ -21,7 +21,11 @@ def gerar_imagem_por_ia(titulo: str) -> str | None:
     Gera uma imagem da receita usando IA com base no título.
     Retorna a URL da imagem gerada.
     """
-    prompt = f"Foto realista de um prato de {titulo}, estilo culinária brasileira, bem apresentado."
+    prompt = (
+    f"Foto realista de um prato chamado {titulo}. "
+    f"Prato típico da culinária brasileira, servido em um prato branco, "
+    f"com ingredientes visíveis e iluminação natural de restaurante."
+    )
 
     try:
         response = requests.post(
