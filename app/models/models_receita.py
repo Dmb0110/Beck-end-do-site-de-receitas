@@ -13,4 +13,4 @@ class Receita(Base):
     nome_da_receita: Mapped[str] = mapped_column(String(100), nullable=False,index=True)
     ingredientes: Mapped[str] = mapped_column(Text, nullable=False)
     modo_de_preparo: Mapped[str] = mapped_column(Text, nullable=False)
-    imagem_url: Mapped[str] = mapped_column(String,nullable=True)
+    #imagem_url: Mapped[str] = mapped_column(String,nullable=True)

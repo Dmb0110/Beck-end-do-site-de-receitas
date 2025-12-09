@@ -1,4 +1,5 @@
 ######################################################
+'''
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -30,13 +31,13 @@ def gerar_imagem_por_ia(nome_da_receita: str,ingredientes: str) -> str | None:
     f"servido em prato branco, com fundo de mesa de madeira, "
     f"iluminação natural e estilo editorial de revista de culinária."
     )
-    '''
+    
     prompt = (
     f"Foto realista de um prato chamado {titulo}. "
     f"Prato típico da culinária brasileira, servido em um prato branco, "
     f"com ingredientes visíveis e iluminação natural de restaurante."
     )
-    '''
+    
     try:
         response = requests.post(
             "https://api.openai.com/v1/images/generations",  # ou outro endpoint de IA
@@ -87,7 +88,7 @@ def atualizar_imagens_antigas(db: Session, limite: int = 5) -> int:
     return atualizadas
 
 
-'''
+
 def atualizar_imagens_antigas(db: Session, limite: int = 5) -> int:
     """
     Atualiza automaticamente receitas antigas sem imagem.
@@ -106,7 +107,7 @@ def atualizar_imagens_antigas(db: Session, limite: int = 5) -> int:
         db.commit()
 
     return atualizadas
-'''
+
 
 @router.post(
     "/enviar",
@@ -136,7 +137,7 @@ def enviar(
     atualizar_imagens_antigas(db)
 
     return receita
-
+'''
 
 
 
@@ -253,7 +254,7 @@ def enviar(
 ######################################################
 
 
-'''
+
 from fastapi import APIRouter, Depends,status, Request
 from app.schemas.schemas import CriarReceita,ReceitaOut
 from sqlalchemy.orm import Session
@@ -285,8 +286,8 @@ def enviar(
     criar.ingredientes = corrigir_texto(criar.ingredientes)
     criar.modo_de_preparo = corrigir_texto(criar.modo_de_preparo)
 
-    return ReceitaService.criar_receita_auth(criar,db,username)
-'''
+    return ReceitaService.criar_receita_auth(criar,db)
+
 
 
 ##############################################################
