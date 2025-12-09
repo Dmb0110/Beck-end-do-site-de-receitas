@@ -14,16 +14,19 @@ router = APIRouter()
 security = HTTPBearer()
 
 # Exemplo: chave de API de um serviço de geração de imagens (OpenAI, Replicate, Stability etc.)
-IA_API_KEY = "53619592-285ee82e135be902f1ae2b184"
+IA_API_KEY = "REMOVED_KEYproj-gArDq3SGq6cD0oC8-ZieTL03kKUeXgh8BGWIGOKUvVLFTcK6cPJUtM7B1EU6_WuiUsnS_5tpy1T3BlbkFJfrLtmZfxY3Fo1CJQfViK1E4wx7hx4WrYWV0-xYwSPjLvEz8FBCD1GZqB8jo_TlNuGgxjfyWS4A"
+'''
+"53619592-285ee82e135be902f1ae2b184"
+'''
 
-def gerar_imagem_por_ia(titulo: str,ingredientes: str) -> str | None:
+def gerar_imagem_por_ia(nome_da_receita: str,ingredientes: str) -> str | None:
     """
     Gera uma imagem da receita usando IA com base no título.
     Retorna a URL da imagem gerada.
     """
 
     prompt = (
-    f"Fotografia gastronômica profissional de {titulo}. "
+    f"Fotografia gastronômica profissional de {nome_da_receita}. "
     f"Prato típico brasileiro feito com {ingredientes}, "
     f"servido em prato branco, com fundo de mesa de madeira, "
     f"iluminação natural e estilo editorial de revista de culinária."
@@ -64,8 +67,28 @@ def gerar_imagem_por_ia(titulo: str,ingredientes: str) -> str | None:
     except Exception as e:
         print("Erro ao chamar IA:", e)
         return None
+    
+def atualizar_imagens_antigas(db: Session, limite: int = 5) -> int:
+    """
+    Atualiza automaticamente receitas antigas sem imagem.
+    """
+    receitas = db.query(Receita).filter(Receita.imagem_url == None).limit(limite).all()
+    atualizadas = 0
+
+    for receita in receitas:
+        imagem_url = gerar_imagem_por_ia(receita.nome_da_receita, receita.ingredientes or "")
+        if imagem_url:
+            receita.imagem_url = imagem_url
+            db.add(receita)
+            atualizadas += 1
+
+    if atualizadas > 0:
+        db.commit()
+
+    return atualizadas
 
 
+'''
 def atualizar_imagens_antigas(db: Session, limite: int = 5) -> int:
     """
     Atualiza automaticamente receitas antigas sem imagem.
@@ -84,7 +107,7 @@ def atualizar_imagens_antigas(db: Session, limite: int = 5) -> int:
         db.commit()
 
     return atualizadas
-
+'''
 
 @router.post(
     "/enviar",
@@ -105,7 +128,7 @@ def enviar(
     criar.modo_de_preparo = corrigir_texto(criar.modo_de_preparo)
 
     # 🔎 Gera imagem da receita com IA
-    imagem_url = gerar_imagem_por_ia(criar.nome_da_receita,ingredientes)
+    imagem_url = gerar_imagem_por_ia(criar.nome_da_receita,criar.ingredientes)
 
     # Salva receita no banco com imagem
     receita = ReceitaService.criar_receita_auth(criar, db, imagem_url=imagem_url)
