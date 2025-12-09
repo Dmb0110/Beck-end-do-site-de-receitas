@@ -16,17 +16,25 @@ security = HTTPBearer()
 # Exemplo: chave de API de um serviço de geração de imagens (OpenAI, Replicate, Stability etc.)
 IA_API_KEY = "53619592-285ee82e135be902f1ae2b184"
 
-def gerar_imagem_por_ia(titulo: str) -> str | None:
+def gerar_imagem_por_ia(titulo: str,ingredientes: str) -> str | None:
     """
     Gera uma imagem da receita usando IA com base no título.
     Retorna a URL da imagem gerada.
     """
+
+    prompt = (
+    f"Fotografia gastronômica profissional de {titulo}. "
+    f"Prato típico brasileiro feito com {ingredientes}, "
+    f"servido em prato branco, com fundo de mesa de madeira, "
+    f"iluminação natural e estilo editorial de revista de culinária."
+    )
+    '''
     prompt = (
     f"Foto realista de um prato chamado {titulo}. "
     f"Prato típico da culinária brasileira, servido em um prato branco, "
     f"com ingredientes visíveis e iluminação natural de restaurante."
     )
-
+    '''
     try:
         response = requests.post(
             "https://api.openai.com/v1/images/generations",  # ou outro endpoint de IA
