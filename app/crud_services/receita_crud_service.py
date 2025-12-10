@@ -58,7 +58,7 @@ class ReceitaService:
         """
         receita = self.db.query(Receita).filter(Receita.id == receita_id).first()
         if not receita:
-            raise HTTPException(status_code=404, detail="Me desculpa usuario,sua receita nao existe mais!")
+            raise HTTPException(status_code=404, detail="Me desculpa usuario poopython9090,sua receita nao existe mais!")
 
         self.db.delete(receita)
         self.db.commit()
