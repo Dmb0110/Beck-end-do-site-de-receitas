@@ -1,192 +1,39 @@
-
-
-'''
-from fastapi import APIRouter, Request, HTTPException, Depends
-from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
-from jose import jwt, JWTError, ExpiredSignatureError
-from passlib.context import CryptContext
-from models.models import Usuario,Receita
-from crud import get_db
-from schemas import LoginRequest,ReceitaOut,CriarReceita,RegisterRequest
-import language_tool_python
-
-router = APIRouter()
-
-# Configurações do JWT
-SECRET_KEY = "sua_chave_secreta"
-
-ALGORITHM = "HS256"
-
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-# Criptografia de senha
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Verifica se a senha fornecida corresponde ao hash armazenado
-def verify_password(plain, hashed):
-    return pwd_context.verify(plain, hashed)
-
-# Gera um token JWT com tempo de expiração
-def create_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-# Decodifica o token JWT e retorna o campo 'sub'
-def decode_token(token: str):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload.get("sub")
-    except JWTError:
-        return None
-
-# Autentitica o usuário comparando credenciais com o banco
-def authenticate_user(db: Session, username: str, password: str):
-    user = db.query(Usuario).filter(Usuario.username == username).first()
-    if not user or not verify_password(password, user.password):
-        return None
-    return user
-
-# verifica se o token JWT está presente e válido
-def verificar_token(request: Request):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Token ausente ou mal formatado")
-
-    token = auth_header.split(" ")[1]
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Token inválido")
-        return username
-    except ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expirado,realize login novamente")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Token inválido")
-
-# Endpoint de login: retorna token se credenciais forem válidas
-@router.post("/login10")
-async def login(request: LoginRequest,db: Session = Depends(get_db)):
-    username = request.username
-    password = request.password
-
-    user = authenticate_user(db,username,password)
-    if not user:
-        raise HTTPException(status_code=401, detail="Credenciais inválidas")
-
-    token = create_token({"sub": username})
-    return {"access_token": token}
-
-#Endpoint de registro de novo usuário
-@router.post("/register", status_code=201)
-async def register(request: RegisterRequest, db: Session = Depends(get_db)):
-    existing_user = db.query(Usuario).filter(Usuario.username == request.username).first()
-    if existing_user:
-        raise HTTPException(status_code=401, detail="Usuário já existe")
-
-    hashed_password = pwd_context.hash(request.password)
-    novo_usuario = Usuario(
-        username=request.username,
-        password=hashed_password,
-    )
-    db.add(novo_usuario)
-    db.commit()
-    db.refresh(novo_usuario)
-
-    return {"msg": "Usuário registrado com sucesso"}
-
-
-# Inicializa o corretor para português do Brasil
-tool = language_tool_python.LanguageToolPublic('pt-BR')
-#tool = language_tool_python.LanguageTool('pt-BR')
-
-
-
-def corrigir_texto(texto: str) -> str:
-    """Corrige ortografia e aplica capitalização no início de frases."""
-    try:
-        matches = tool.check(texto)
-        texto_corrigido = language_tool_python.utils.correct(texto, matches)
-        return capitalizar_frases(texto_corrigido)
-    except Exception as e:
-        print(f"Erro ao corrigir texto: {e}")
-        return capitalizar_frases(texto)  # retorna texto original capitalizado
-
-def corrigir_texto(texto: str) -> str:
-    """Corrige ortografia e aplica capitalização no início de frases."""
-    texto_corrigido = tool.correct(texto)
-    return capitalizar_frases(texto_corrigido)
-
-
-def capitalizar_frases(texto: str) -> str:
-    """Coloca letra maiúscula no início de cada frase."""
-    frases = texto.split('. ')
-    frases_formatadas = [frase.capitalize() for frase in frases]
-    return '. '.join(frases_formatadas)
-
-@router.post('/enviar', response_model=ReceitaOut)
-def enviar(request: Request, criar: CriarReceita, db: Session = Depends(get_db)):
-    username = verificar_token(request)
-
-    # Aplica correção ortográfica e capitalização nos campos textuais
-    criar.nome_da_receita = corrigir_texto(criar.nome_da_receita)
-    criar.ingredientes = corrigir_texto(criar.ingredientes)
-    criar.modo_de_preparo = corrigir_texto(criar.modo_de_preparo)
-
-    nova_receita = Receita(**criar.dict())
-    db.add(nova_receita)
-    db.commit()
-    db.refresh(nova_receita)
-    return nova_receita
-
-
-tool = language_tool_python.LanguageToolPublic('pt-BR')
-
-
-def corrigir_texto(texto: str) -> str:
-    """Corrige ortografia e aplica capitalização no início de frases."""
-    try:
-        matches = tool.check(texto)
-        texto_corrigido = language_tool_python.utils.correct(texto, matches)
-        return capitalizar_frases(texto_corrigido)
-    except Exception as e:
-        print(f"Erro ao corrigir texto: {e}")
-        return capitalizar_frases(texto)  # retorna texto original capitalizado
-
-
-'''
-
 from fastapi import APIRouter, Request, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from jose import jwt, JWTError, ExpiredSignatureError
 from passlib.context import CryptContext
-from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.models.models_usuario import Usuario
-#from app.crud import get_db
-#from app.schemas.schemas import LoginRequest, ReceitaOut, CriarReceita, RegisterRequest
 import requests  # ✅ substitui o language_tool_python
 
-#router = APIRouter()
-
-# Configurações do JWT
+# ======================== Configurações de Autenticação ========================
+# Chave secreta usada para assinar os tokens JWT. Em produção, deve ser obtida via
+# variável de ambiente e nunca hardcoded no código.
 SECRET_KEY = "sua_chave_secreta"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ALGORITHM = "HS256"  # Algoritmo de assinatura do JWT
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Tempo de expiração do token em minutos
 
+# Contexto de hashing de senhas usando bcrypt. O 'deprecated="auto"' garante
+# compatibilidade com versões antigas de hash.
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# Middleware de segurança para extrair credenciais do header Authorization.
 security = HTTPBearer()
 
-# ------------------- Autenticação -------------------
+# ------------------- Funções de Autenticação -------------------
+
 def verify_password(plain, hashed):
+    """Verifica se a senha em texto plano corresponde ao hash armazenado."""
     return pwd_context.verify(plain, hashed)
 
 
 def create_token(data: dict, expires_delta: timedelta = None):
+    """
+    Cria um JWT contendo os dados do usuário.
+    - 'data' deve incluir pelo menos o campo 'sub' (subject/username).
+    - O token expira após 'expires_delta' ou pelo tempo padrão configurado.
+    """
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
@@ -194,6 +41,10 @@ def create_token(data: dict, expires_delta: timedelta = None):
 
 
 def decode_token(token: str):
+    """
+    Decodifica um JWT e retorna o campo 'sub' (username).
+    Retorna None se o token for inválido ou não decodificável.
+    """
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload.get("sub")
@@ -202,6 +53,12 @@ def decode_token(token: str):
 
 
 def authenticate_user(db: Session, username: str, password: str):
+    """
+    Autentica um usuário consultando o banco:
+    - Busca pelo username.
+    - Verifica se a senha fornecida corresponde ao hash armazenado.
+    Retorna o objeto Usuario se válido, ou None caso contrário.
+    """
     user = db.query(Usuario).filter(Usuario.username == username).first()
     if not user or not verify_password(password, user.password):
         return None
@@ -209,6 +66,12 @@ def authenticate_user(db: Session, username: str, password: str):
 
 
 def verificar_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Middleware de validação de token JWT:
+    - Decodifica o token recebido no header Authorization.
+    - Retorna o username se válido.
+    - Lança HTTPException 401 em caso de token inválido ou expirado.
+    """
     token = credentials.credentials
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -230,35 +93,27 @@ def verificar_token(credentials: HTTPAuthorizationCredentials = Depends(security
             detail="Token inválido"
         )
 
-
-'''
-def verificar_token(request: Request):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Token ausente ou mal formatado")
-
-    token = auth_header.split(" ")[1]
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Token inválido")
-        return username
-    except ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expirado, realize login novamente")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Token inválido")
-'''
-# ------------------- Correção de texto -------------------
+# ======================== Funções de Correção de Texto ========================
 
 def capitalizar_frases(texto: str) -> str:
-    """Coloca letra maiúscula no início de cada frase."""
+    """
+    Coloca letra maiúscula no início de cada frase.
+    - Divide o texto por pontos.
+    - Remove espaços extras.
+    - Capitaliza cada frase.
+    """
     frases = [f.strip().capitalize() for f in texto.split('.')]
     return '. '.join(frases).strip()
 
 
 def corrigir_texto(texto: str) -> str:
-    """Corrige ortografia usando a API pública do LanguageTool e aplica capitalização."""
+    """
+    Corrige ortografia usando a API pública do LanguageTool.
+    - Envia o texto para a API (pt-BR).
+    - Aplica correções sugeridas de trás para frente (para não quebrar offsets).
+    - Capitaliza frases após correção.
+    - Em caso de erro na API, apenas capitaliza.
+    """
     url = "https://api.languagetool.org/v2/check"
     data = {
         "text": texto,
@@ -269,7 +124,7 @@ def corrigir_texto(texto: str) -> str:
         response.raise_for_status()
         result = response.json()
 
-        # aplica as correções de trás pra frente
+        # Aplica correções de trás para frente para preservar índices
         for match in reversed(result.get('matches', [])):
             offset = match['offset']
             length = match['length']
@@ -282,57 +137,3 @@ def corrigir_texto(texto: str) -> str:
     except Exception as e:
         print(f"Erro ao corrigir texto: {e}")
         return capitalizar_frases(texto)
-
-
-
-
-'''
-# ------------------- Endpoints -------------------
-
-@router.post("/login10")
-async def login(request: LoginRequest, db: Session = Depends(get_db)):
-    username = request.username
-    password = request.password
-
-    user = authenticate_user(db, username, password)
-    if not user:
-        raise HTTPException(status_code=401, detail="Credenciais inválidas")
-
-    token = create_token({"sub": username})
-    return {"access_token": token}
-
-
-@router.post("/register", status_code=201)
-async def register(request: RegisterRequest, db: Session = Depends(get_db)):
-    existing_user = db.query(Usuario).filter(Usuario.username == request.username).first()
-    if existing_user:
-        raise HTTPException(status_code=401, detail="Usuário já existe")
-
-    hashed_password = pwd_context.hash(request.password)
-
-    novo_usuario = Usuario(username=request.username, password=hashed_password)
-    db.add(novo_usuario)
-    db.commit()
-    db.refresh(novo_usuario)
-    return {"msg": "Usuário registrado com sucesso"}
-
-'''
-
-
-'''
-@router.post('/enviar', response_model=ReceitaOut)
-def enviar(request: Request, criar: CriarReceita, db: Session = Depends(get_db)):
-    username = verificar_token(request)
-
-    # Corrige texto antes de salvar
-    criar.nome_da_receita = corrigir_texto(criar.nome_da_receita)
-    criar.ingredientes = corrigir_texto(criar.ingredientes)
-    criar.modo_de_preparo = corrigir_texto(criar.modo_de_preparo)
-
-    nova_receita = Receita(**criar.dict())
-    db.add(nova_receita)
-    db.commit()
-    db.refresh(nova_receita)
-    return nova_receita
-'''
-
