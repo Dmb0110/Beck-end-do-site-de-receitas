@@ -10,7 +10,7 @@ class RegistroService:
     def registrar_usuario(request: RegisterRequest,db: Session) -> dict:
         existing_user = db.query(Usuario).filter(Usuario.username == request.username).first()
         if existing_user:
-            raise HTTPException(status_code=401, detail="Usuário já existe")
+            raise HTTPException(status_code=400, detail="Usuário já existe")
 
         hashed_password = pwd_context.hash(request.password)
 

@@ -1,9 +1,9 @@
-from dotenv import load_dotenv
-from fastapi import FastAPI
-from sqlalchemy import String, Text, Integer, String
+#from dotenv import load_dotenv
+#from fastapi import FastAPI
+from sqlalchemy import String, Text, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.session import Base
-import os
+#import os
 
 # Modelo da tabela 'receitas'
 class Receita(Base):

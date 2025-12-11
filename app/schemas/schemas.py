@@ -30,7 +30,7 @@ class ReceitaOut(BaseModel):
 # Modelo para atualização parcial de receita
 class Atualizar(BaseModel):
     nome_da_receita: Optional[str] = Field(None, min_length=3, max_length=100)
-    ingredientes: Optional[List[str]] = None
+    ingredientes: Optional[str] = None
     modo_de_preparo: Optional[str] = Field(None, min_length=5)
 
 # Modelo para resposta de exclusão
