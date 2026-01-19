@@ -29,7 +29,7 @@ app.include_router(jwt_router)
 app.mount('/',StaticFiles(directory='front3',html=True), name='static')
 
 
-'''
+
 
 
 
@@ -58,7 +58,7 @@ app.include_router(crud_router)
 app.include_router(jwt_router)
 
 
-'''
+
 
 
 FROM python:3.11-slim
